@@ -18,6 +18,8 @@ export default function PanelLayout() {
       : [
           ['/panel/produk', 'Produk'],
           ['/panel/kategori', 'Kategori'],
+          ['/panel/pesanan', 'Pesanan pembeli'],
+          ['/panel/konsultasi', 'Konsultasi'],
         ]
 
   return (

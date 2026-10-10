@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
             'role' => 'pemilik',
         ]);
 
-        $this->call(KatalogProdukSeeder::class);
+        $this->call([
+            KatalogProdukSeeder::class,
+            PelangganSeeder::class,
+        ]);
     }
 }

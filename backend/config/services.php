@@ -2,6 +2,11 @@
 
 return [
 
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'dp_percent' => (int) env('MIDTRANS_DP_PERCENT', 50),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

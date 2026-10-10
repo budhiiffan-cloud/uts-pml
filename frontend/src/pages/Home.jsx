@@ -51,6 +51,7 @@ export default function Home() {
   const { data, loading, error, reload } = useFetch('/produk')
   const [q, setQ] = useState('')
   const [kat, setKat] = useState('semua')
+  const [ukuran, setUkuran] = useState('semua')
   const { hash } = useLocation()
 
   // Router tidak otomatis scroll ke #katalog, jadi dilakukan manual setelah data siap.
@@ -68,6 +69,7 @@ export default function Home() {
   const tampil = produk.filter(
     (p) =>
       (kat === 'semua' || String(p.id_kategori) === kat) &&
+      (ukuran === 'semua' || p.ukuran === ukuran) &&
       p.nama_produk.toLowerCase().includes(q.trim().toLowerCase()),
   )
 
@@ -128,6 +130,12 @@ export default function Home() {
         )}
 
         <div className="mt-8">
+          <label className="mb-5 block max-w-xs text-sm font-semibold">Filter ukuran
+            <select value={ukuran} onChange={(event) => setUkuran(event.target.value)} className="mt-1 block w-full rounded-md border border-mist bg-white px-3 py-2">
+              <option value="semua">Semua ukuran</option>
+              {[...new Set(produk.map((p) => p.ukuran).filter(Boolean))].map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
           {loading ? (
             <Spinner />
           ) : error ? (

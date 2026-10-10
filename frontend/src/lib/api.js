@@ -14,8 +14,8 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, form } = {}) {
-  const headers = { Accept: 'application/json' }
+async function request(path, { method = 'GET', body, form, headers: extraHeaders = {} } = {}) {
+  const headers = { ...extraHeaders, Accept: 'application/json' }
   const token = getToken()
   if (token) headers.Authorization = `Bearer ${token}`
 
@@ -52,8 +52,8 @@ async function request(path, { method = 'GET', body, form } = {}) {
 }
 
 export const api = {
-  get: (p) => request(p),
-  post: (p, body) => request(p, { method: 'POST', body }),
+  get: (p, options = {}) => request(p, options),
+  post: (p, body, options = {}) => request(p, { ...options, method: 'POST', body }),
   put: (p, body) => request(p, { method: 'PUT', body }),
   del: (p) => request(p, { method: 'DELETE' }),
   // Laravel tidak membaca multipart lewat PUT, jadi update dikirim POST + _method=PUT.

@@ -9,6 +9,12 @@ import Akun from './pages/panel/Akun'
 import Kategori from './pages/panel/Kategori'
 import PanelLayout from './pages/panel/PanelLayout'
 import Produk from './pages/panel/Produk'
+import Checkout from './pages/Checkout'
+import BuyerOrders from './pages/BuyerOrders'
+import BuyerOrderDetail from './pages/BuyerOrderDetail'
+import Consultation from './pages/Consultation'
+import Pesanan from './pages/panel/Pesanan'
+import Konsultasi from './pages/panel/Konsultasi'
 
 function PanelIndex() {
   const { user } = useAuth()
@@ -21,6 +27,10 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/produk/:id" element={<ProductDetail />} />
+        <Route path="/checkout/:id" element={<Checkout />} />
+        <Route path="/pesanan" element={<BuyerOrders />} />
+        <Route path="/pesanan/:code" element={<BuyerOrderDetail />} />
+        <Route path="/konsultasi" element={<Consultation />} />
       </Route>
 
       <Route path="/login" element={<Login />} />
@@ -28,7 +38,7 @@ export default function App() {
       <Route
         path="/panel"
         element={
-          <RequireRole>
+          <RequireRole roles={['admin', 'pemilik']}>
             <PanelLayout />
           </RequireRole>
         }
@@ -36,6 +46,8 @@ export default function App() {
         <Route index element={<PanelIndex />} />
         <Route path="produk" element={<RequireRole roles={['admin']}><Produk /></RequireRole>} />
         <Route path="kategori" element={<RequireRole roles={['admin']}><Kategori /></RequireRole>} />
+        <Route path="pesanan" element={<RequireRole roles={['admin']}><Pesanan /></RequireRole>} />
+        <Route path="konsultasi" element={<RequireRole roles={['admin']}><Konsultasi /></RequireRole>} />
         <Route path="akun" element={<RequireRole roles={['pemilik']}><Akun /></RequireRole>} />
       </Route>
 

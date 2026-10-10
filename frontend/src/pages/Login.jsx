@@ -34,7 +34,7 @@ export default function Login() {
         <Link to="/" className="font-display text-2xl font-extrabold tracking-tight">
           Tama<span className="text-shell">farm</span>
         </Link>
-        <h1 className="mt-4 font-display text-2xl font-bold">Masuk ke panel</h1>
+        <h1 className="mt-4 font-display text-2xl font-bold">Masuk ke akun</h1>
         <div className="mt-6 space-y-4">
           <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus required />
           <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />

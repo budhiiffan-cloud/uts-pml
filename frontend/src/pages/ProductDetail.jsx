@@ -3,9 +3,11 @@ import { Price, ProductImage } from '../components/ProductCard'
 import { ErrorNote, Spinner } from '../components/ui'
 import { qty, waLink } from '../lib/format'
 import { useFetch } from '../lib/useFetch'
+import { useAuth } from '../context/AuthContext'
 
 export default function ProductDetail() {
   const { id } = useParams()
+  const { user } = useAuth()
   const { data: p, loading, error, reload } = useFetch(`/produk/${id}`)
 
   return (
@@ -41,6 +43,11 @@ export default function ProductDetail() {
             </dl>
 
             {p.deskripsi && <p className="mt-6 max-w-prose whitespace-pre-line leading-relaxed text-tank/85">{p.deskripsi}</p>}
+
+            {(!user || user.role === 'pelanggan') && <div className="mt-8 flex flex-wrap gap-3">
+              {Number(p.stok) > 0 ? <Link to={`/checkout/${id}`} className="rounded-md bg-tank px-5 py-3 font-semibold text-foam hover:bg-tank-soft">Ajukan pesanan</Link> : <span className="rounded-md bg-mist px-5 py-3 font-semibold">Stok habis</span>}
+              <Link to="/konsultasi" className="rounded-md border border-tank px-5 py-3 font-semibold">Konsultasi dengan admin</Link>
+            </div>}
 
             {waLink(`Halo Tamafarm, saya tertarik dengan ${p.nama_produk}.`) && (
               <a

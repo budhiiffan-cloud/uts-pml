@@ -4,7 +4,12 @@ import { api, getToken, setToken } from '../lib/api'
 const AuthContext = createContext(null)
 
 // Halaman awal panel sesuai role (pemilik hanya mengelola akun admin).
-export const homeFor = (user) => (user?.role === 'pemilik' ? '/panel/akun' : '/panel/produk')
+export const homeFor = (user) => {
+  if (user?.role === 'pemilik') return '/panel/akun'
+  if (user?.role === 'admin') return '/panel/produk'
+  if (user?.role === 'pelanggan') return '/pesanan'
+  return '/'
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
