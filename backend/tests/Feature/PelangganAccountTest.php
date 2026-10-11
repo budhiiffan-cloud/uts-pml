@@ -68,4 +68,23 @@ class PelangganAccountTest extends TestCase
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_customer_can_register_new_account(): void
+    {
+        $payload = [
+            'nama' => 'Budi Santoso',
+            'username' => 'budi_santoso',
+            'password' => 'password123',
+            'no_hp' => '081298765432',
+        ];
+
+        $response = $this->postJson('/api/register', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.user.username', 'budi_santoso')
+            ->assertJsonPath('data.user.role', 'pelanggan');
+
+        $this->assertDatabaseHas('users', ['username' => 'budi_santoso', 'role' => 'pelanggan']);
+        $this->assertDatabaseHas('pelanggan', ['nama' => 'Budi Santoso']);
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuyerOrderController;
 use App\Http\Controllers\Api\BuyerProfileController;
 use App\Http\Controllers\Api\ConsultationController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\KategoriController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProdukController;
@@ -12,7 +13,8 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Publik
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:60,1');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:60,1');
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 Route::post('/pesanan', [BuyerOrderController::class, 'store'])->middleware('throttle:10,1');
@@ -22,9 +24,9 @@ Route::post('/pesanan/{code}/diterima', [BuyerOrderController::class, 'received'
 Route::post('/pesanan/{code}/pembayaran', [PaymentController::class, 'create'])->middleware('throttle:10,1');
 Route::post('/pesanan/{code}/status-pembayaran', [PaymentController::class, 'refresh'])->middleware('throttle:10,1');
 Route::post('/midtrans/notification', [PaymentController::class, 'webhook']);
-Route::post('/konsultasi/mulai', [ConsultationController::class, 'start'])->middleware('throttle:10,1');
-Route::get('/konsultasi/{id}', [ConsultationController::class, 'messages'])->middleware('throttle:60,1');
-Route::post('/konsultasi/{id}', [ConsultationController::class, 'send'])->middleware('throttle:20,1');
+Route::post('/konsultasi/mulai', [ConsultationController::class, 'start'])->middleware('throttle:30,1');
+Route::get('/konsultasi/{id}', [ConsultationController::class, 'messages'])->middleware('throttle:120,1');
+Route::post('/konsultasi/{id}', [ConsultationController::class, 'send'])->middleware('throttle:60,1');
 
 // Wajib login
 Route::middleware('auth:sanctum')->group(function () {
@@ -37,6 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pembeli/profil', [BuyerProfileController::class, 'show']);
         Route::put('/pembeli/profil', [BuyerProfileController::class, 'update']);
         Route::get('/pembeli/pesanan', [BuyerOrderController::class, 'index']);
+    });
+
+    Route::middleware('role:admin,pemilik')->group(function () {
+        Route::get('/pengelolaan/dashboard', [DashboardController::class, 'index']);
     });
 
     // Admin: kelola kategori & produk

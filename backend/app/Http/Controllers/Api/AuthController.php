@@ -22,6 +22,50 @@ class AuthController extends Controller
         ]]);
     }
 
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'nama'     => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:users,username',
+            'password' => 'required|string|min:6',
+            'no_hp'    => 'nullable|string|max:20',
+        ], [
+            'username.unique' => 'Username sudah digunakan, silakan pilih username lain.',
+            'password.min'    => 'Password minimal 6 karakter.',
+        ]);
+
+        $user = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+            $user = User::create([
+                'nama'     => $data['nama'],
+                'username' => $data['username'],
+                'password' => $data['password'],
+                'role'     => 'pelanggan',
+            ]);
+
+            \Illuminate\Support\Facades\DB::table('pelanggan')->insert([
+                'id_user'      => $user->id_user,
+                'nama'         => $data['nama'],
+                'no_hp'        => $data['no_hp'] ?: '081234567890',
+                'alamat'       => '-',
+                'negara'       => 'Indonesia',
+                'tipe_pembeli' => 'perorangan',
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+
+            return $user;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registrasi berhasil',
+            'data'    => [
+                'token' => $user->createToken('auth')->plainTextToken,
+                'user'  => $user,
+            ],
+        ], 201);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

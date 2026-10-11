@@ -1,69 +1,104 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-
-const brand = (
-  <>
-    Tama<span className="text-shell">farm</span>
-  </>
-)
 
 export default function PanelLayout() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
 
+  const handleLogout = async () => {
+    await logout()
+    navigate('/', { replace: true })
+  }
+
   const links =
-    user.role === 'pemilik'
-      ? [['/panel/akun', 'Akun admin']]
-      : [
+    user?.role === 'pemilik'
+      ? [
+          ['/panel/dashboard', 'Dashboard'],
           ['/panel/produk', 'Produk'],
-          ['/panel/kategori', 'Kategori'],
-          ['/panel/pesanan', 'Pesanan pembeli'],
-          ['/panel/konsultasi', 'Konsultasi'],
+          ['/panel/kategori', 'Kategori Produk'],
+          ['/panel/pesanan', 'Pesanan'],
+          ['/panel/penawaran', 'Penawaran'],
+          ['/panel/konsultasi', 'Chat'],
+          ['/panel/laporan', 'Laporan'],
+          ['/panel/akun', 'Akun Admin'],
+        ]
+      : [
+          ['/panel/dashboard', 'Dashboard'],
+          ['/panel/produk', 'Produk'],
+          ['/panel/kategori', 'Kategori Produk'],
+          ['/panel/pesanan', 'Pesanan'],
+          ['/panel/penawaran', 'Penawaran'],
+          ['/panel/konsultasi', 'Chat'],
+          ['/panel/laporan', 'Laporan'],
         ]
 
   return (
-    <div className="min-h-screen lg:flex">
-      {/* Bilah atas khusus layar kecil */}
-      <div className="flex items-center justify-between border-b border-mist bg-white px-4 py-3 lg:hidden">
-        <Link to="/" className="font-display text-xl font-extrabold tracking-tight">{brand}</Link>
+    <div className="min-h-screen bg-[#f6f8fb] lg:flex antialiased selection:bg-slate-800 selection:text-white">
+      {/* Mobile Topbar */}
+      <div className="flex items-center justify-between border-b border-slate-800 bg-[#0c1929] px-6 py-4 lg:hidden">
+        <div>
+          <h1 className="text-lg font-bold tracking-wider text-white">TAMA FARM</h1>
+          <p className="text-xs text-slate-400 capitalize">{user?.role === 'pemilik' ? 'Pemilik' : 'Admin'}</p>
+        </div>
         <button
           onClick={() => setOpen(true)}
           aria-label="Buka menu"
-          aria-expanded={open}
-          className="rounded-md p-2 hover:bg-mist/60"
+          className="rounded-lg p-2 text-slate-300 hover:bg-[#182638] hover:text-white transition-colors"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M3 5h14M3 10h14M3 15h14" />
           </svg>
         </button>
       </div>
 
-      {open && <div className="fixed inset-0 z-30 bg-tank/60 lg:hidden" onClick={() => setOpen(false)} aria-hidden="true" />}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
+      {/* Sidebar Layout Matching Exact Mockup */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-tank text-foam transition-transform lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#0c1929] transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-5">
-          <Link to="/" className="font-display text-2xl font-extrabold tracking-tight">{brand}</Link>
-          <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="rounded p-1 text-foam/70 hover:text-foam lg:hidden">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        {/* Brand header */}
+        <div className="px-6 pt-8 pb-7 flex items-start justify-between">
+          <div>
+            <h1 className="text-xl font-extrabold tracking-wider text-white">TAMA FARM</h1>
+            <p className="text-xs text-slate-400 mt-1 capitalize font-medium">
+              {user?.role === 'pemilik' ? 'Pemilik' : 'Admin'}
+            </p>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Tutup menu"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-[#182638] hover:text-white lg:hidden"
+          >
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M3 3l10 10M13 3L3 13" />
             </svg>
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3" aria-label="Menu panel">
+        {/* Menu Items */}
+        <nav className="flex-1 space-y-1.5 px-3 overflow-y-auto" aria-label="Menu panel">
           {links.map(([to, label]) => (
             <NavLink
               key={to}
               to={to}
+              end={to === '/panel/dashboard'}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `block rounded-md border-l-4 px-3 py-2 text-sm font-semibold ${
-                  isActive ? 'border-shell bg-foam/10 text-white' : 'border-transparent text-foam/75 hover:bg-foam/5 hover:text-white'
+                `block rounded-xl px-4 py-3 text-sm font-medium transition-all duration-150 ${
+                  isActive
+                    ? 'bg-[#182638] text-white shadow-xs font-semibold'
+                    : 'text-slate-400 hover:bg-[#132032] hover:text-slate-200'
                 }`
               }
             >
@@ -72,23 +107,20 @@ export default function PanelLayout() {
           ))}
         </nav>
 
-        <div className="border-t border-foam/15 p-4 text-sm">
-          <p className="font-semibold">{user.nama}</p>
-          <p className="text-foam/65">{user.role === 'pemilik' ? 'Pemilik' : 'Admin'}</p>
-          <Link to="/" className="mt-3 block text-foam/75 underline underline-offset-4 hover:text-white">
-            Lihat situs
-          </Link>
+        {/* Bottom logout section */}
+        <div className="p-6 pt-3 mt-auto">
           <button
-            onClick={logout}
-            className="mt-3 w-full rounded-md border border-foam/30 px-3 py-2 font-semibold hover:bg-foam/10"
+            onClick={handleLogout}
+            className="flex w-full items-center px-1 py-2 text-sm font-medium text-[#f87171] hover:text-red-400 transition-colors cursor-pointer"
           >
             Keluar
           </button>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 px-4 py-8 lg:px-10">
-        <div className="mx-auto max-w-5xl">
+      {/* Main Content Area */}
+      <main className="min-w-0 flex-1 px-5 py-8 sm:px-10 lg:px-12 overflow-y-auto">
+        <div className="mx-auto max-w-[1360px]">
           <Outlet />
         </div>
       </main>
@@ -99,7 +131,7 @@ export default function PanelLayout() {
 export function PageHeader({ title, action }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="font-display text-3xl font-bold">{title}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">{title}</h1>
       {action}
     </div>
   )

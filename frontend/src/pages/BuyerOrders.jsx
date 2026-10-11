@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Empty, ErrorNote, Spinner, TextField } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { useFetch } from '../lib/useFetch'
 import { guestOrders, rememberOrder, statusLabel } from '../lib/orders'
@@ -23,30 +22,129 @@ export default function BuyerOrders() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold">Pesanan saya</h1>
-      <p className="mt-2 text-tank/70">Pantau penawaran, pembayaran, dan pengiriman.</p>
-      {authLoading || (user?.role === 'pelanggan' && loading) ? <Spinner /> : error ? <ErrorNote message={error} onRetry={reload} /> : user?.role === 'pelanggan' ? (
-        <div className="mt-6 space-y-3">
-          {data?.data?.length ? data.data.map((order) => (
-            <Link key={order.kode_pesanan} to={`/pesanan/${order.kode_pesanan}`} className="flex flex-wrap justify-between gap-3 rounded-md border border-mist bg-white p-5">
-              <div><p className="font-bold">{order.kode_pesanan}</p><p className="mt-1 text-sm capitalize">{statusLabel(order.status_pesanan)}</p></div>
-              <p className="font-bold">{rupiah(order.total)}</p>
-            </Link>
-          )) : <Empty title="Belum ada pesanan"><Link to="/#katalog" className="underline">Pilih produk dari katalog</Link></Empty>}
-          {data?.last_page > 1 && <div className="flex gap-3"><Button disabled={page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</Button><span>Halaman {page}</span><Button disabled={page === data.last_page} onClick={() => setPage(page + 1)}>Berikutnya</Button></div>}
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Pesanan Saya
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 font-normal">
+          Pantau status penawaran harga, pembayaran, dan pengiriman pesanan Anda.
+        </p>
+      </div>
+
+      {authLoading || (user?.role === 'pelanggan' && loading) ? (
+        <div className="py-12 text-center text-sm text-slate-500">Memuat data pesanan...</div>
+      ) : error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-600">
+          {error}
+        </div>
+      ) : user?.role === 'pelanggan' ? (
+        <div className="space-y-4">
+          {data?.data?.length ? (
+            data.data.map((order) => (
+              <Link
+                key={order.kode_pesanan}
+                to={`/pesanan/${order.kode_pesanan}`}
+                className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md transition-all group"
+              >
+                <div>
+                  <p className="font-bold text-slate-900 group-hover:text-[#dc4c3e] transition-colors">
+                    {order.kode_pesanan}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 capitalize">
+                    Status: <span className="font-semibold text-slate-800">{statusLabel(order.status_pesanan)}</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-extrabold text-slate-900 text-base">{rupiah(order.total)}</p>
+                  <span className="text-xs text-[#dc4c3e] font-semibold mt-0.5 inline-block">Lihat Detail →</span>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-8 text-center text-sm text-slate-500">
+              Belum ada pesanan aktif.{' '}
+              <Link to="/#produk" className="text-[#dc4c3e] font-semibold underline">
+                Pilih lobster dari katalog
+              </Link>
+            </div>
+          )}
+
+          {data?.last_page > 1 && (
+            <div className="flex gap-2 justify-center pt-4">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-medium disabled:opacity-40"
+              >
+                Sebelumnya
+              </button>
+              <button
+                disabled={page === data.last_page}
+                onClick={() => setPage(page + 1)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-medium disabled:opacity-40"
+              >
+                Berikutnya
+              </button>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="mt-6 space-y-3">
-          <p className="text-sm text-tank/70">Pesanan tamu tersimpan pada browser ini. Simpan kode dan token akses untuk membukanya di perangkat lain.</p>
-          {guests.length ? guests.map((order) => <Link key={order.code} className="block rounded-md border border-mist bg-white p-4 font-semibold" to={`/pesanan/${order.code}`}>{order.code} →</Link>) : <Empty title="Belum ada pesanan di browser ini" />}
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500">
+            Riwayat pesanan tamu tersimpan di browser ini:
+          </p>
+          {guests.length ? (
+            guests.map((order) => (
+              <Link
+                key={order.code}
+                to={`/pesanan/${order.code}`}
+                className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md transition-all font-semibold text-slate-900 group"
+              >
+                <span>{order.code}</span>
+                <span className="text-xs text-[#dc4c3e] group-hover:translate-x-1 transition-transform">Buka Pesanan →</span>
+              </Link>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-8 text-center text-xs text-slate-500">
+              Belum ada pesanan tersimpan di browser ini.
+            </div>
+          )}
         </div>
       )}
-      <form onSubmit={track} className="mt-10 max-w-lg space-y-4 rounded-lg border border-mist p-5">
-        <h2 className="font-display text-xl font-bold">Buka pesanan dengan kode</h2>
-        <TextField label="Kode pesanan" value={code} onChange={(e) => setCode(e.target.value)} required maxLength={30} placeholder="TF-..." />
-        <TextField label="Token akses pesanan tamu" value={token} onChange={(e) => setToken(e.target.value)} hint="Tidak perlu diisi untuk pesanan milik akun yang sedang login." maxLength={64} />
-        <Button type="submit">Lihat pesanan</Button>
+
+      {/* Track by Code Form */}
+      <form onSubmit={track} className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.02)] max-w-lg space-y-4">
+        <h2 className="text-base font-bold text-slate-900">
+          Lacak Pesanan dengan Kode
+        </h2>
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Kode Pesanan</label>
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+            placeholder="Contoh: ORD-0021"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-slate-800 focus:outline-none uppercase font-mono"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Token Akses Tamu (Opsional)</label>
+          <input
+            type="text"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            placeholder="Masukkan token jika memesan tanpa akun"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-slate-800 focus:outline-none"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-xl bg-[#0c1929] hover:bg-[#182638] px-6 py-2.5 text-xs font-semibold text-white transition-colors cursor-pointer"
+        >
+          Lihat Pesanan
+        </button>
       </form>
     </div>
   )

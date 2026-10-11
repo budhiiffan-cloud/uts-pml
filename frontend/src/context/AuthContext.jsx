@@ -3,10 +3,10 @@ import { api, getToken, setToken } from '../lib/api'
 
 const AuthContext = createContext(null)
 
-// Halaman awal panel sesuai role (pemilik hanya mengelola akun admin).
+// Halaman awal panel sesuai role
 export const homeFor = (user) => {
-  if (user?.role === 'pemilik') return '/panel/akun'
-  if (user?.role === 'admin') return '/panel/produk'
+  if (user?.role === 'pemilik') return '/panel/dashboard'
+  if (user?.role === 'admin') return '/panel/dashboard'
   if (user?.role === 'pelanggan') return '/pesanan'
   return '/'
 }
@@ -26,12 +26,32 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const onExpired = () => setUser(null)
+    const onStorage = (e) => {
+      if (e.key === 'tamafarm_token') {
+        if (e.newValue) {
+          api.get('/me').then((r) => setUser(r.data)).catch(() => setUser(null))
+        } else {
+          setUser(null)
+        }
+      }
+    }
     window.addEventListener('auth:expired', onExpired)
-    return () => window.removeEventListener('auth:expired', onExpired)
+    window.addEventListener('storage', onStorage)
+    return () => {
+      window.removeEventListener('auth:expired', onExpired)
+      window.removeEventListener('storage', onStorage)
+    }
   }, [])
 
   const login = useCallback(async (username, password) => {
     const r = await api.post('/login', { username, password })
+    setToken(r.data.token)
+    setUser(r.data.user)
+    return r.data.user
+  }, [])
+
+  const register = useCallback(async (nama, username, password, noHp) => {
+    const r = await api.post('/register', { nama, username, password, no_hp: noHp })
     setToken(r.data.token)
     setUser(r.data.user)
     return r.data.user
@@ -47,7 +67,7 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout])
+  const value = useMemo(() => ({ user, loading, login, logout, register }), [user, loading, login, logout, register])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

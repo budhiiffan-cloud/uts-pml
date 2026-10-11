@@ -17,7 +17,7 @@ class OrderAccess
 
         if ($user !== null) {
             $customer = DB::table('pelanggan')->where('id_pelanggan', $order->id_pelanggan)->first();
-            if ($user->role === 'pelanggan' && $customer !== null && (int) $customer->id_user === (int) $user->id_user) {
+            if ($user->role === 'admin' || $user->role === 'pemilik' || ($customer !== null && (int) $customer->id_user === (int) $user->id_user)) {
                 return $order;
             }
         }

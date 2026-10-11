@@ -36,7 +36,6 @@ class BuyerOrderController extends Controller
             'items.*.jumlah' => 'required|numeric|min:0.01|max:100000|decimal:0,2',
         ]);
         $user = $request->user('sanctum');
-        abort_if($user !== null && $user->role !== 'pelanggan', 403, 'Pengajuan pesanan hanya untuk pembeli.');
         $token = Str::random(64);
 
         $code = DB::transaction(function () use ($data, $user, $token): string {

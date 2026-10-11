@@ -15,6 +15,9 @@ import BuyerOrderDetail from './pages/BuyerOrderDetail'
 import Consultation from './pages/Consultation'
 import Pesanan from './pages/panel/Pesanan'
 import Konsultasi from './pages/panel/Konsultasi'
+import Dashboard from './pages/panel/Dashboard'
+import Penawaran from './pages/panel/Penawaran'
+import Laporan from './pages/panel/Laporan'
 
 function PanelIndex() {
   const { user } = useAuth()
@@ -30,10 +33,18 @@ export default function App() {
         <Route path="/checkout/:id" element={<Checkout />} />
         <Route path="/pesanan" element={<BuyerOrders />} />
         <Route path="/pesanan/:code" element={<BuyerOrderDetail />} />
-        <Route path="/konsultasi" element={<Consultation />} />
+        <Route
+          path="/konsultasi"
+          element={
+            <RequireRole roles={['pelanggan', 'admin', 'pemilik']}>
+              <Consultation />
+            </RequireRole>
+          }
+        />
       </Route>
 
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Login defaultRegister={true} />} />
 
       <Route
         path="/panel"
@@ -44,10 +55,13 @@ export default function App() {
         }
       >
         <Route index element={<PanelIndex />} />
-        <Route path="produk" element={<RequireRole roles={['admin']}><Produk /></RequireRole>} />
-        <Route path="kategori" element={<RequireRole roles={['admin']}><Kategori /></RequireRole>} />
-        <Route path="pesanan" element={<RequireRole roles={['admin']}><Pesanan /></RequireRole>} />
-        <Route path="konsultasi" element={<RequireRole roles={['admin']}><Konsultasi /></RequireRole>} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="produk" element={<RequireRole roles={['admin', 'pemilik']}><Produk /></RequireRole>} />
+        <Route path="kategori" element={<RequireRole roles={['admin', 'pemilik']}><Kategori /></RequireRole>} />
+        <Route path="pesanan" element={<RequireRole roles={['admin', 'pemilik']}><Pesanan /></RequireRole>} />
+        <Route path="penawaran" element={<RequireRole roles={['admin', 'pemilik']}><Penawaran /></RequireRole>} />
+        <Route path="konsultasi" element={<RequireRole roles={['admin', 'pemilik']}><Konsultasi /></RequireRole>} />
+        <Route path="laporan" element={<RequireRole roles={['admin', 'pemilik']}><Laporan /></RequireRole>} />
         <Route path="akun" element={<RequireRole roles={['pemilik']}><Akun /></RequireRole>} />
       </Route>
 
