@@ -45,8 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pengelolaan/dashboard', [DashboardController::class, 'index']);
     });
 
-    // Admin: kelola kategori & produk
-    Route::middleware('role:admin')->group(function () {
+    // Admin & Pemilik: kelola kategori, produk, pesanan, penawaran, konsultasi
+    Route::middleware('role:admin,pemilik')->group(function () {
         Route::get('/pengelolaan/pesanan', [AdminOrderController::class, 'index']);
         Route::get('/pengelolaan/pesanan/{code}', [AdminOrderController::class, 'show']);
         Route::post('/pengelolaan/pesanan/{code}/penawaran', [AdminOrderController::class, 'offer']);
