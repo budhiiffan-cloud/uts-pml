@@ -19,10 +19,15 @@ Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 Route::post('/pesanan', [BuyerOrderController::class, 'store'])->middleware('throttle:10,1');
 Route::get('/pesanan/{code}', [BuyerOrderController::class, 'show'])->middleware('throttle:60,1');
+Route::get('/pembeli/pesanan/{code}', [BuyerOrderController::class, 'show'])->middleware('throttle:60,1');
 Route::post('/pesanan/{code}/penawaran', [BuyerOrderController::class, 'decision'])->middleware('throttle:10,1');
+Route::post('/pembeli/pesanan/{code}/penawaran', [BuyerOrderController::class, 'decision'])->middleware('throttle:10,1');
 Route::post('/pesanan/{code}/diterima', [BuyerOrderController::class, 'received'])->middleware('throttle:10,1');
+Route::post('/pembeli/pesanan/{code}/diterima', [BuyerOrderController::class, 'received'])->middleware('throttle:10,1');
 Route::post('/pesanan/{code}/pembayaran', [PaymentController::class, 'create'])->middleware('throttle:10,1');
+Route::post('/pembeli/pesanan/{code}/pembayaran', [PaymentController::class, 'create'])->middleware('throttle:10,1');
 Route::post('/pesanan/{code}/status-pembayaran', [PaymentController::class, 'refresh'])->middleware('throttle:10,1');
+Route::post('/pembeli/pesanan/{code}/status-pembayaran', [PaymentController::class, 'refresh'])->middleware('throttle:10,1');
 Route::post('/midtrans/notification', [PaymentController::class, 'webhook']);
 Route::post('/konsultasi/mulai', [ConsultationController::class, 'start'])->middleware('throttle:30,1');
 Route::get('/konsultasi/{id}', [ConsultationController::class, 'messages'])->middleware('throttle:120,1');
@@ -40,6 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/pembeli/profil', [BuyerProfileController::class, 'update']);
         Route::get('/pembeli/pesanan', [BuyerOrderController::class, 'index']);
         Route::post('/pembeli/pesanan', [BuyerOrderController::class, 'store']);
+        Route::get('/pembeli/pesanan/{code}', [BuyerOrderController::class, 'show']);
+        Route::post('/pembeli/pesanan/{code}/penawaran', [BuyerOrderController::class, 'decision']);
+        Route::post('/pembeli/pesanan/{code}/diterima', [BuyerOrderController::class, 'received']);
+        Route::post('/pembeli/pesanan/{code}/pembayaran', [PaymentController::class, 'create']);
+        Route::post('/pembeli/pesanan/{code}/status-pembayaran', [PaymentController::class, 'refresh']);
         Route::match(['GET', 'POST'], '/pembeli/firebase/session', function () {
             return response()->json(['success' => true, 'message' => 'Firebase session aktif']);
         });
