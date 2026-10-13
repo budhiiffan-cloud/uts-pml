@@ -39,6 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pembeli/profil', [BuyerProfileController::class, 'show']);
         Route::put('/pembeli/profil', [BuyerProfileController::class, 'update']);
         Route::get('/pembeli/pesanan', [BuyerOrderController::class, 'index']);
+        Route::post('/pembeli/pesanan', [BuyerOrderController::class, 'store']);
+        Route::match(['GET', 'POST'], '/pembeli/firebase/session', function () {
+            return response()->json(['success' => true, 'message' => 'Firebase session aktif']);
+        });
     });
 
     Route::middleware('role:admin,pemilik')->group(function () {

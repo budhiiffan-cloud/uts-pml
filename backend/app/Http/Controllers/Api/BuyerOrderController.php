@@ -24,18 +24,62 @@ class BuyerOrderController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user('sanctum');
+        $customer = $user ? DB::table('pelanggan')->where('id_user', $user->id_user)->first() : null;
+
+        // Auto-fill profil jika user sudah login dan field tidak disertakan dari mobile
+        if ($customer !== null) {
+            $request->merge([
+                'nama' => $request->input('nama') ?: $customer->nama ?: $user->nama,
+                'no_hp' => $request->input('no_hp') ?: $customer->no_hp ?: '081234567890',
+                'alamat' => $request->input('alamat') ?: $customer->alamat ?: 'Alamat Pengiriman',
+                'negara' => $request->input('negara') ?: $customer->negara ?: 'Indonesia',
+                'tipe_pembeli' => $request->input('tipe_pembeli') ?: $customer->tipe_pembeli ?: 'perorangan',
+            ]);
+        }
+
+        // Normalisasi format items (mendukung variasi payload mobile app maupun web)
+        $rawItems = $request->input('items');
+        if (!is_array($rawItems) && $request->has('id_produk')) {
+            $rawItems = [[
+                'id_produk' => (int) $request->input('id_produk'),
+                'jumlah' => (float) ($request->input('jumlah') ?: $request->input('qty') ?: 1),
+            ]];
+        } elseif (is_array($rawItems)) {
+            $normalized = [];
+            foreach ($rawItems as $it) {
+                $pId = $it['id_produk'] ?? $it['produk_id'] ?? $it['id'] ?? null;
+                $qty = $it['jumlah'] ?? $it['qty'] ?? $it['quantity'] ?? 1;
+                if ($pId !== null) {
+                    $normalized[] = [
+                        'id_produk' => (int) $pId,
+                        'jumlah' => (float) $qty,
+                    ];
+                }
+            }
+            if (!empty($normalized)) {
+                $rawItems = $normalized;
+            }
+        }
+        if ($rawItems !== null) {
+            $request->merge(['items' => $rawItems]);
+        }
+
         $data = $request->validate([
             'nama' => 'required|string|max:100',
-            'no_hp' => 'required|string|max:20|regex:/^[+0-9 ()-]{6,20}$/',
+            'no_hp' => 'required|string|max:50',
             'alamat' => 'required|string|max:2000',
-            'negara' => 'required|string|max:50',
-            'tipe_pembeli' => 'required|in:perorangan,restoran,luar_negeri',
+            'negara' => 'nullable|string|max:50',
+            'tipe_pembeli' => 'nullable|string|in:perorangan,restoran,luar_negeri',
             'catatan' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1|max:50',
             'items.*.id_produk' => 'required|integer|distinct|exists:produk_lobster,id_produk',
-            'items.*.jumlah' => 'required|numeric|min:0.01|max:100000|decimal:0,2',
+            'items.*.jumlah' => 'required|numeric|min:0.01|max:100000',
         ]);
-        $user = $request->user('sanctum');
+
+        if (empty($data['negara'])) $data['negara'] = 'Indonesia';
+        if (empty($data['tipe_pembeli'])) $data['tipe_pembeli'] = 'perorangan';
+
         $token = Str::random(64);
 
         $code = DB::transaction(function () use ($data, $user, $token): string {
